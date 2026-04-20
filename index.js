@@ -2,21 +2,10 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
-// Debug logger 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
-// Root route 
-app.get('/', (req, res) => {
-  res.send('API is running');
-});
 
 // Sample data
 let lessons = [
