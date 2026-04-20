@@ -13,7 +13,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Root route (IMPORTANT for StackBlitz)
+// Root route 
 app.get('/', (req, res) => {
   res.send('API is running');
 });
@@ -45,7 +45,7 @@ app.get('/api/lessons', (req, res) => {
   res.json(lessons);
 });
 
-// GET single lesson (optional but useful)
+// GET single lesson 
 app.get('/api/lessons/:id', (req, res) => {
   const lesson = lessons.find(l => l.id === parseInt(req.params.id));
   if (!lesson) {
@@ -101,7 +101,7 @@ app.put('/api/lessons/:id', (req, res) => {
   });
 });
 
-// DELETE lesson (extra feature)
+// DELETE lesson 
 app.delete('/api/lessons/:id', (req, res) => {
   const index = lessons.findIndex(l => l.id === parseInt(req.params.id));
 
@@ -121,3 +121,4 @@ app.delete('/api/lessons/:id', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
