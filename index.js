@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -8,57 +7,119 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, 'public')));
-
 // Sample data
 let lessons = [
-  { id: 1, subject: "Geometry", uploadedby: "Zeirah", description: "An introduction to geometric shapes." },
-  { id: 2, subject: "Biology", uploadedby: "Liamxian", description: "Basic concepts in biology." },
-  { id: 3, subject: "Calculus", uploadedby: "Sunny", description: "Derivatives and integrals." }
+  {
+    id: 1,
+    subject: "Geometry",
+    uploadedby: "Zeirah",
+    description: "An introduction to geometric shapes and their properties."
+  },
+  {
+    id: 2,
+    subject: "Biology",
+    uploadedby: "Liamxian",
+    description: "Basic concepts in biology, including the study of cells and organisms."
+  },
+  {
+    id: 3,
+    subject: "Calculus",
+    uploadedby: "Sunny",
+    description: "An overview of calculus concepts like derivatives and integrals."
+  }
 ];
 
-// Routes
-app.get('/api/lessons', (req, res) => res.json(lessons));
+// GET all lessons
+app.get('/api/lessons', (req, res) => {
+  res.json(lessons);
+});
 
+// GET single lesson
 app.get('/api/lessons/:id', (req, res) => {
-  const lesson = lessons.find(l => l.id == req.params.id);
-  if (!lesson) return res.status(404).json({ message: "Not found" });
+  const lesson = lessons.find(l => l.id === parseInt(req.params.id));
+
+  if (!lesson) {
+    return res.status(404).json({ message: "Lesson not found" });
+  }
+
   res.json(lesson);
 });
 
+// POST add lesson
 app.post('/api/lessons', (req, res) => {
   const { subject, uploadedby, description } = req.body;
 
+  if (!subject || !uploadedby) {
+    return res.status(400).json({
+      message: "Subject and uploadedby are required"
+    });
+  }
+
+  const id =
+    lessons.length > 0
+      ? lessons[lessons.length - 1].id + 1
+      : 1;
+
   const newLesson = {
-    id: lessons.length + 1,
+    id,
     subject,
     uploadedby,
-    description
+    description: description || ""
   };
 
   lessons.push(newLesson);
-  res.status(201).json(newLesson);
+
+  res.status(201).json({
+    message: "Lesson added successfully",
+    lesson: newLesson
+  });
 });
 
+// PUT update lesson
 app.put('/api/lessons/:id', (req, res) => {
-  const lesson = lessons.find(l => l.id == req.params.id);
-  if (!lesson) return res.status(404).json({ message: "Not found" });
+  const lesson = lessons.find(
+    l => l.id === parseInt(req.params.id)
+  );
 
-  Object.assign(lesson, req.body);
-  res.json(lesson);
+  if (!lesson) {
+    return res.status(404).json({
+      message: "Lesson not found"
+    });
+  }
+
+  const { subject, uploadedby, description } = req.body;
+
+  if (subject !== undefined) lesson.subject = subject;
+  if (uploadedby !== undefined) lesson.uploadedby = uploadedby;
+  if (description !== undefined) lesson.description = description;
+
+  res.json({
+    message: "Lesson updated successfully",
+    lesson
+  });
 });
 
+// DELETE lesson
 app.delete('/api/lessons/:id', (req, res) => {
-  lessons = lessons.filter(l => l.id != req.params.id);
-  res.json({ message: "Deleted" });
+  const index = lessons.findIndex(
+    l => l.id === parseInt(req.params.id)
+  );
+
+  if (index === -1) {
+    return res.status(404).json({
+      message: "Lesson not found"
+    });
+  }
+
+  const deleted = lessons.splice(index, 1);
+
+  res.json({
+    message: "Lesson deleted successfully",
+    lesson: deleted[0]
+  });
 });
 
-// IMPORTANT: homepage fix
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
+// Start server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
